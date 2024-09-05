@@ -113,7 +113,7 @@ nafco01 專案設計用於從 PLC 透過 RS485 接口收集資料，並通過 Lo
 若要監控從 PLC 傳送的資料，您可以使用以下指令來訂閱相關的主題：
 
 ```bash
-mosquitto_sub -h 192.168.1.170 -t "application/#/device/#/event/up" -v
+mosquitto_sub -h 192.168.1.170 -t "application/+/device/+/event/up" -v
 ```
 
 ### 2. 解讀訊息
