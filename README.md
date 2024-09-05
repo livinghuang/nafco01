@@ -1,4 +1,3 @@
----
 # nafco01 Project
 
 **Description**:  
@@ -176,4 +175,3 @@ mosquitto_sub -h 192.168.1.170 -t "application/#/device/#/event/up" -v
 ### 7. 疑難排解
 - **MQTT 中無數據**：檢查設備是否在 ChirpStack 中正確配置，並確保 LoRaWAN 閘道器正常運作。
 - **資料格式錯誤**：驗證 PLC 的資料格式，並確保 RS485 連接正常。
----
