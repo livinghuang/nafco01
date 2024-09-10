@@ -164,3 +164,171 @@ You should now have access to the device's command-line interface.
 ## **Support**
 
 For further assistance or troubleshooting, please contact [Your Support Contact Information].
+
+# **nafco01 專案指南**
+
+### **專案描述**  
+**nafco01** 專案旨在透過 RS485 介面從 PLC 收集數據，並將其傳輸到使用 ChirpStack 的 LoRaWAN 網絡。所收集的數據將通過 LoRaWAN 發送至 MQTT 中介服務器，進行進一步的分析和可視化。
+
+### **系統概覽**  
+- **RS485 到 LoRaWAN**：從 PLC 收集數據並透過 LoRaWAN 傳輸。
+- **LoRaWAN 閘道器**：連接到 ChirpStack LoRaWAN 伺服器。
+- **MQTT 中介服務器**：接收並存儲消息以進行數據處理。
+
+### **先決條件**
+- **ChirpStack**：已安裝並配置。
+- **具備 RS485 輸出的 PLC**：已配置以發送所需數據。
+- **LoRaWAN 閘道器**：已連接到 LoRaWAN 網絡。
+- **MQTT 中介服務器**：已設定以接收來自 ChirpStack 的 LoRaWAN 數據。
+
+---
+
+## **操作說明**
+
+### 1. **訂閱 MQTT 主題**
+要監控從 PLC 傳入的數據，可以使用以下命令訂閱對應的 MQTT 主題，接收上行消息：
+
+```bash
+mosquitto_sub -h 192.168.1.170 -t "application/+/device/+/event/up" -v
+```
+
+### 2. **解讀接收到的消息**
+每條來自 ChirpStack 的消息均以 JSON 格式發送，目標數據位於 `"object"` 欄位中的 `"hexString"`。
+
+範例 JSON 消息：
+
+```json
+{
+  "application": "4a881480-2ede-464a-94d0-f1958ae9a86d",
+  "device": "88883c84279de948",
+  "event": "up",
+  "object": {
+    "hexString": "01031400df00e0000200030004000500060007000800097af0"
+  }
+}
+```
+
+- **hexString**：表示從 PLC 收集到的原始數據。
+
+### 3. **處理數據**
+`"hexString"` 包含從 PLC 接收到的原始數據，可以根據 PLC 的數據格式轉換為有意義的資訊。
+
+例如：
+- `0103` 可能表示特定的功能碼。
+- `1400df00e0...` 可能包含感測器數值或狀態碼。
+
+### 4. **在 ChirpStack 中配置您的設備**
+確保設備在 ChirpStack 中配置正確：
+- **設備檔案**：選擇適合的設備檔案，例如 `Base_ABP`。
+- **應用程式**：在 ChirpStack 中將設備加入 "nafco" 應用程式。
+- **LoRaWAN 設定**： 
+  - 設備類別：`CLASS_A`
+  - 數據速率：根據專案需求進行調整。
+
+### 5. **LoRaWAN 上行消息範例**
+以下是一個 LoRaWAN 上行消息的範例：
+
+```json
+{
+  "deviceName": "nafco9",
+  "devEui": "88883c84279de948",
+  "fCnt": 1294,
+  "fPort": 2,
+  "data": "AQMUAN8A4AACAAMABAAFAAYABwAIAAl68A==",
+  "object": {
+    "hexString": "01031400df00e0000200030004000500060007000800097af0"
+  }
+}
+```
+
+### 6. **部署與測試步驟**
+1. **將 PLC 連接** 至 RS485 介面。
+2. **確保 LoRaWAN 閘道器** 已連接到網絡並已註冊到 ChirpStack。
+3. **開始從 PLC 收集數據**，並驗證數據是否成功發布至 MQTT 主題。
+
+### 7. **故障排除**
+- **MQTT 中無數據**：檢查設備在 ChirpStack 中的配置，並確認 LoRaWAN 閘道器是否正常工作。
+- **數據格式錯誤**：確認 RS485 連接正確，並檢查 PLC 的數據格式。
+
+---
+
+## **將 Linxdot LoRaWAN 閘道器從 DHCP 設置為靜態 IP**
+
+### 步驟 1：透過 SSH 連接設備
+
+1. **透過路由器介面或網絡掃描工具獲取設備的 IP 位址**。
+2. **開啟終端機**（Linux/macOS）或 SSH 客戶端（例如 PuTTY for Windows）。
+3. **透過 SSH 連接設備**，執行以下命令：
+
+   ```bash
+   ssh root@<ip.address>
+   ```
+
+4. **輸入默認密碼**：
+
+   ```bash
+   linxdot
+   ```
+
+您現在應該已進入設備的命令行介面。
+
+### 步驟 2：將網絡配置從 DHCP 更改為靜態 IP
+
+1. **備份當前的網絡配置**：
+
+   ```bash
+   cp /etc/config/network /etc/config/network.backup
+   ```
+
+2. **使用 `vi` 編輯網絡配置檔案**：
+
+   ```bash
+   vi /etc/config/network
+   ```
+
+3. **修改 LAN 介面設置**，將其更改為靜態 IP。將默認設置替換為以下內容：
+
+   ```bash
+   config interface 'lan'
+       option proto 'static'
+       option ipaddr '192.168.1.100'    # 將其替換為您需要的靜態 IP
+       option netmask '255.255.255.0'   # 設置正確的子網掩碼
+       option gateway '192.168.1.1'     # 將其替換為您路由器的閘道 IP
+       option dns '8.8.8.8 8.8.4.4'     # 設置 DNS 伺服器（例如 Google DNS）
+   ```
+
+4. **保存並退出編輯器**：  
+   - 按 `ESC` 退出插入模式。
+   - 輸入 `:wq` 並按下 `Enter` 以保存更改並退出。
+
+5. **重新啟動網絡服務**：
+
+   ```bash
+   /etc/init.d/network restart
+   ```
+
+6. **驗證靜態 IP 設定**，執行以下命令：
+
+   ```bash
+   ifconfig
+   ```
+
+   輸出應顯示 `lan` 介面的靜態 IP 地址。
+
+---
+
+### 其他提示：
+- **故障排除**：如果連接中斷，請檢查靜態 IP 設置是否與您的網絡配置相匹配。
+- **還原配置**：如果有必要，可以使用備份還原原始 DHCP 配置：
+
+   ```bash
+   cp /etc/config/network.backup /etc/config/network
+   /etc/init.d/network restart
+   ```
+
+---
+
+## **技術支援**
+
+若需進一步協助或技術支援，請聯繫 [您的支援聯絡資訊]。
+
