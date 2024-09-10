@@ -1,5 +1,3 @@
----
-
 # **nafco01 Project Guide**
 
 ### **Description**  
@@ -166,5 +164,3 @@ You should now have access to the device's command-line interface.
 ## **Support**
 
 For further assistance or troubleshooting, please contact [Your Support Contact Information].
-
----
