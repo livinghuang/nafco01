@@ -1,32 +1,36 @@
-# nafco01 Project
+---
 
-**Description**:  
-The nafco01 project is designed to collect data from a PLC using the RS485 interface and transmit it to a LoRaWAN network via ChirpStack. The system captures the data from the PLC, formats it, and sends it using LoRaWAN to an MQTT broker, where it can be processed and visualized.
+# **nafco01 Project Guide**
 
-## System Overview
-- **RS485 to LoRaWAN**: Data is collected via the RS485 interface from the PLC, and the messages are sent via LoRaWAN.
-- **LoRaWAN Gateway**: Communicates with the LoRaWAN server (ChirpStack).
-- **MQTT Broker**: Messages are published to specific MQTT topics for data analysis.
+### **Description**  
+The **nafco01** project collects data from a PLC via RS485 and transmits it to a LoRaWAN network using ChirpStack. The collected data is sent via LoRaWAN to an MQTT broker for further analysis and visualization.
 
-## Prerequisites
-- **ChirpStack setup**: Ensure ChirpStack is installed and configured.
-- **PLC with RS485 output**: Configured to send the necessary data.
+### **System Overview**  
+- **RS485 to LoRaWAN**: Collects data from the PLC and transmits it via LoRaWAN.
+- **LoRaWAN Gateway**: Connects to the ChirpStack LoRaWAN server.
+- **MQTT Broker**: Receives and stores the messages for data processing.
+
+### **Prerequisites**
+- **ChirpStack**: Installed and configured.
+- **PLC with RS485 output**: Configured to send necessary data.
 - **LoRaWAN Gateway**: Connected to the LoRaWAN network.
-- **MQTT Broker**: Set up to receive data from ChirpStack.
+- **MQTT Broker**: Set up to receive LoRaWAN data from ChirpStack.
 
-## Instructions
+---
 
-### 1. Subscribing to the MQTT Topic
-To monitor incoming data from the PLC, you can use the following command to subscribe to the appropriate topic:
+## **Instructions**
+
+### 1. **Subscribing to the MQTT Topic**
+To monitor incoming data from the PLC, subscribe to the following MQTT topic to receive uplink messages:
 
 ```bash
 mosquitto_sub -h 192.168.1.170 -t "application/+/device/+/event/up" -v
 ```
 
-### 2. Interpreting the Message
-Messages received from ChirpStack are formatted in JSON and contain several fields, including the target data in the `"object"` field under `"hexString"`. 
+### 2. **Interpreting Incoming Messages**
+Each message from ChirpStack is in JSON format, and the target data is located in the `"object"` field under `"hexString"`.
 
-Example message:
+Example JSON message:
 
 ```json
 {
@@ -39,27 +43,25 @@ Example message:
 }
 ```
 
-- **hexString**: This contains the data collected from the PLC via RS485.
+- **hexString**: Represents the raw data collected from the PLC.
 
-### 3. Data Processing
-The `"hexString"` value represents the raw data from the PLC. This data can be converted to meaningful information based on the PLC’s data format.
+### 3. **Processing the Data**
+The `"hexString"` contains the raw data received from the PLC, which can be converted into meaningful information. 
 
 For example:
+- `0103` may represent a specific function code.
+- `1400df00e0...` could contain sensor values or status codes.
 
-- `0103` might represent a specific function code.
-- `1400df00e0...` might represent specific sensor values or status codes.
-
-### 4. Device Configuration
-Ensure that your device is properly configured in ChirpStack:
-
-- **Device Profile**: Use a device profile like `Base_ABP` for your devices.
-- **Application**: The device is part of the "nafco" application in ChirpStack.
+### 4. **Configuring Your Device in ChirpStack**
+Ensure the device is configured correctly in ChirpStack:
+- **Device Profile**: Use a suitable device profile such as `Base_ABP`.
+- **Application**: Add the device under the "nafco" application in ChirpStack.
 - **LoRaWAN Settings**: 
-  - Device Class: CLASS_A
-  - Data Rate: Adjust based on the project needs.
-  
-### 5. LoRaWAN Uplink Data Example
-Here is a detailed example of an uplink message:
+  - Device Class: `CLASS_A`
+  - Data Rate: Adjust as needed for your project.
+
+### 5. **Example LoRaWAN Uplink Message**
+Here is an example of a LoRaWAN uplink message:
 
 ```json
 {
@@ -74,104 +76,95 @@ Here is a detailed example of an uplink message:
 }
 ```
 
-### 6. Deployment and Testing
-- **Step 1**: Connect the PLC to the RS485 interface.
-- **Step 2**: Ensure the LoRaWAN gateway is online and connected to ChirpStack.
-- **Step 3**: Start data collection from the PLC and verify that data is being published to the MQTT topic.
+### 6. **Deployment and Testing Steps**
+1. **Connect the PLC** to the RS485 interface.
+2. **Ensure the LoRaWAN gateway** is connected to the network and ChirpStack.
+3. **Start data collection** from the PLC and verify that the data is being published to the MQTT topic.
 
-### 7. Troubleshooting
-- **No Data in MQTT**: Check that the device is correctly configured in ChirpStack and that the LoRaWAN gateway is operational.
-- **Incorrect Data Format**: Verify the PLC's data format and ensure the RS485 connection is correct.
-
-## Support
-For any issues or additional assistance, please contact [Your Support Contact].
-
----
-以下是針對 **nafco01 專案** 的說明文件範例，您可以提供給客戶使用此系統的指南：
+### 7. **Troubleshooting**
+- **No Data in MQTT**: Check the device configuration in ChirpStack and ensure the LoRaWAN gateway is operational.
+- **Incorrect Data Format**: Verify that the RS485 connection is correct and check the PLC’s data format.
 
 ---
 
-# nafco01 專案
+## **Setting Up Linxdot LoRaWAN Gateway from DHCP to Static IP**
 
-**描述**：  
-nafco01 專案設計用於從 PLC 透過 RS485 接口收集資料，並通過 LoRaWAN 網路將其傳送到 ChirpStack 系統。系統將來自 PLC 的資料進行格式化處理，並透過 LoRaWAN 發送至 MQTT Broker，供進一步分析和顯示。
+### Step 1: Connect to the Device via SSH
 
-## 系統概覽
-- **RS485 至 LoRaWAN**：系統透過 RS485 接口從 PLC 收集資料，並將訊息通過 LoRaWAN 發送。
-- **LoRaWAN 閘道器**：與 LoRaWAN 伺服器（ChirpStack）進行通訊。
-- **MQTT Broker**：訊息會發布至指定的 MQTT 主題，以供資料分析。
+1. **Obtain the device's IP address** using your router's interface or a network scanning tool.
+2. **Open a terminal** (Linux/macOS) or an SSH client like PuTTY (Windows).
+3. **SSH into the device** by running the following command:
 
-## 先決條件
-- **ChirpStack 設置**：確保已安裝並配置好 ChirpStack 系統。
-- **具備 RS485 輸出的 PLC**：配置為傳送必要的資料。
-- **LoRaWAN 閘道器**：已連接至 LoRaWAN 網路。
-- **MQTT Broker**：設置為接收來自 ChirpStack 的資料。
+   ```bash
+   ssh root@<ip.address>
+   ```
 
-## 使用說明
+4. **Enter the default password** when prompted:
 
-### 1. 訂閱 MQTT 主題
-若要監控從 PLC 傳送的資料，您可以使用以下指令來訂閱相關的主題：
+   ```bash
+   linxdot
+   ```
 
-```bash
-mosquitto_sub -h 192.168.1.170 -t "application/+/device/+/event/up" -v
-```
+You should now have access to the device's command-line interface.
 
-### 2. 解讀訊息
-從 ChirpStack 收到的訊息是以 JSON 格式表示，並包含多個欄位，其中目標資料位於 `"object"` 欄位下的 `"hexString"`。
+### Step 2: Change Network Configuration from DHCP to Static IP
 
-範例訊息：
+1. **Backup the current network configuration**:
 
-```json
-{
-  "application": "4a881480-2ede-464a-94d0-f1958ae9a86d",
-  "device": "88883c84279de948",
-  "event": "up",
-  "object": {
-    "hexString": "01031400df00e0000200030004000500060007000800097af0"
-  }
-}
-```
+   ```bash
+   cp /etc/config/network /etc/config/network.backup
+   ```
 
-- **hexString**：這裡包含從 PLC 經由 RS485 收集到的資料。
+2. **Edit the network configuration file** using the `vi` editor:
 
-### 3. 資料處理
-`"hexString"` 值代表從 PLC 收集到的原始資料。這些資料可以根據 PLC 的資料格式轉換成有意義的資訊。
+   ```bash
+   vi /etc/config/network
+   ```
 
-例如：
+3. **Modify the LAN interface section** to use a static IP address. Replace the default settings with the following:
 
-- `0103` 可能代表特定的功能代碼。
-- `1400df00e0...` 可能代表特定的感測器數值或狀態碼。
+   ```bash
+   config interface 'lan'
+       option proto 'static'
+       option ipaddr '192.168.1.100'    # Replace with desired static IP
+       option netmask '255.255.255.0'   # Set appropriate subnet mask
+       option gateway '192.168.1.1'     # Replace with your router's gateway IP
+       option dns '8.8.8.8 8.8.4.4'     # Set DNS servers (e.g., Google DNS)
+   ```
 
-### 4. 設備配置
-確保設備已在 ChirpStack 中正確配置：
+4. **Save and exit the editor**:  
+   - Press `ESC` to exit insert mode.
+   - Type `:wq` and press `Enter` to save the changes and exit.
 
-- **設備配置檔**：使用類似 `Base_ABP` 的設備配置檔。
-- **應用程式**：設備屬於 ChirpStack 中的 "nafco" 應用程式。
-- **LoRaWAN 設置**： 
-  - 設備類別：CLASS_A
-  - 資料傳輸速率：根據專案需求進行調整。
+5. **Restart the network service**:
 
-### 5. LoRaWAN 上行數據範例
-以下是上行訊息的詳細範例：
+   ```bash
+   /etc/init.d/network restart
+   ```
 
-```json
-{
-  "deviceName": "nafco9",
-  "devEui": "88883c84279de948",
-  "fCnt": 1294,
-  "fPort": 2,
-  "data": "AQMUAN8A4AACAAMABAAFAAYABwAIAAl68A==",
-  "object": {
-    "hexString": "01031400df00e0000200030004000500060007000800097af0"
-  }
-}
-```
+6. **Verify the changes** by running the following command:
 
-### 6. 部署與測試
-- **步驟 1**：將 PLC 連接至 RS485 接口。
-- **步驟 2**：確保 LoRaWAN 閘道器在線並已連接至 ChirpStack。
-- **步驟 3**：開始從 PLC 收集資料，並驗證資料是否已發布到 MQTT 主題。
+   ```bash
+   ifconfig
+   ```
 
-### 7. 疑難排解
-- **MQTT 中無數據**：檢查設備是否在 ChirpStack 中正確配置，並確保 LoRaWAN 閘道器正常運作。
-- **資料格式錯誤**：驗證 PLC 的資料格式，並確保 RS485 連接正常。
+   The output should show the new static IP address for the `lan` interface.
+
+---
+
+### Additional Tips:
+- **Troubleshooting**: If you lose connection, verify the static IP settings to ensure they match your network configuration.
+- **Reverting changes**: If needed, restore the original DHCP configuration using the backup:
+
+   ```bash
+   cp /etc/config/network.backup /etc/config/network
+   /etc/init.d/network restart
+   ```
+
+---
+
+## **Support**
+
+For further assistance or troubleshooting, please contact [Your Support Contact Information].
+
+---
